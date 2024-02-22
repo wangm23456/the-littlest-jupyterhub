@@ -60,23 +60,23 @@ def download_miniconda_installer(installer_url, sha256sum):
     if os.path.isfile(cfile):
         logger.info(f"use conda installer {cfile}")
         yield cfile
-    logger.info(f"Downloading conda installer {installer_url}")
-    with tempfile.NamedTemporaryFile("wb", suffix=".sh") as f:
-        tic = time.perf_counter()
-        r = requests.get(installer_url)
-        r.raise_for_status()
-        f.write(r.content)
-        # Remain in the NamedTemporaryFile context, but flush changes, see:
-        # https://docs.python.org/3/library/os.html#os.fsync
-        f.flush()
-        os.fsync(f.fileno())
-        t = time.perf_counter() - tic
-        logger.info(f"Downloaded conda installer {installer_url} in {t:.1f}s")
+    else:
+        logger.info(f"Downloading conda installer {installer_url}")
+        with tempfile.NamedTemporaryFile("wb", suffix=".sh") as f:
+            tic = time.perf_counter()
+            r = requests.get(installer_url)
+            r.raise_for_status()
+            f.write(r.content)
+            # Remain in the NamedTemporaryFile context, but flush changes, see:
+            # https://docs.python.org/3/library/os.html#os.fsync
+            f.flush()
+            os.fsync(f.fileno())
+            t = time.perf_counter() - tic
+            logger.info(f"Downloaded conda installer {installer_url} in {t:.1f}s")
 
-        if sha256sum and sha256_file(f.name) != sha256sum:
-            raise Exception("sha256sum hash mismatch! Downloaded file corrupted")
-
-        yield f.name
+            if sha256sum and sha256_file(f.name) != sha256sum:
+                raise Exception("sha256sum hash mismatch! Downloaded file corrupted")
+            yield f.name
 
 
 def fix_permissions(prefix):
