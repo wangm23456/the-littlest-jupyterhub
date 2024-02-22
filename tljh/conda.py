@@ -55,10 +55,11 @@ def download_miniconda_installer(installer_url, sha256sum):
     of given version, verifies the sha256sum & provides path to it to the `with`
     block to run.
     """
+    logger = logging.getLogger("tljh")
     cfile = os.environ.get("CONDA_INSTALLER_PATH", "")
     if os.path.isfile(cfile):
+        logger.info(f"use conda installer {cfile}")
         yield cfile
-    logger = logging.getLogger("tljh")
     logger.info(f"Downloading conda installer {installer_url}")
     with tempfile.NamedTemporaryFile("wb", suffix=".sh") as f:
         tic = time.perf_counter()
