@@ -91,6 +91,19 @@ def check_traefik_version(traefik_bin):
 
 @backoff.on_exception(backoff.expo, Exception, max_tries=2, giveup=fatal_error)
 def ensure_traefik_binary(prefix):
+    cfile = os.environ.get("TRAEFIK_TAR_PATH", "")
+    if os.path.isfile(cfile):
+        traefik_bin_dir = os.path.join(prefix, "bin")
+        traefik_bin = os.path.join(prefix, "bin", "traefik")
+        if os.path.exists(traefik_bin):
+            if check_traefik_version(traefik_bin):
+                return
+            else:
+                os.remove(traefik_bin)
+        with tarfile.open(cfile, "r") as tf:
+            tf.extract("traefik", path=traefik_bin_dir)
+        os.chmod(traefik_bin, 0o755)
+        return
     """Download and install the traefik binary to a location identified by a prefix path such as '/opt/tljh/hub/'"""
     if plat is None:
         raise OSError(
